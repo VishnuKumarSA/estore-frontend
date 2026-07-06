@@ -1,13 +1,12 @@
 import React from 'react'
-import Navbar from '../../components/layout/Navbar'
+import Banner from '../../components/layout/Banner'
+import FeaturedProducts from '../../components/layout/FeaturedProducts'
 
 const Home = () => {
     return (
-        <div>
-            <Navbar />
-            <h1 class="text-3xl font-bold underline">
-                Hello world!
-            </h1>
+        <div>            
+            <Banner />
+            <FeaturedProducts />          
         </div>
     )
 }
