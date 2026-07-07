@@ -9,6 +9,8 @@ import Checkout from './pages/Home/Checkout';
 import Login from './pages/Home/Login';
 import Register from './pages/Home/Register';
 import Categories from './pages/Home/Categories';
+import ProtectedRoute from './Routes/ProtectedRoute';
+import NotFound from './pages/Home/NotFound';
 
 
 
@@ -19,14 +21,24 @@ function App() {
     <div>
       <Navbar />
       <Routes>
-        <Route path="/" element={<Home />} />
-        <Route path="/products" element={<ProductList />} />
-        <Route path="/products-details" element={<ProductDetails />} />
-        <Route path="/cart" element={<Cart />} />
-        <Route path="/checkout" element={<Checkout />} />
+
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
-        <Route path="/categories" element={<Categories />} />
+        <Route path="*" element={<NotFound />} />
+
+        <Route element={<ProtectedRoute />}>
+          <Route path="/" element={<Home />} />
+          <Route path="/products" element={<ProductList />} />
+          <Route path="/products-details" element={<ProductDetails />} />
+          <Route path="/cart" element={<Cart />} />
+          <Route path="/checkout" element={<Checkout />} />
+
+          <Route path="/categories" element={<Categories />} />
+
+        </Route>
+
+
+
       </Routes>
     </div>
   );

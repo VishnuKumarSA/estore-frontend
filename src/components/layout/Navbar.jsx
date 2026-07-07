@@ -1,22 +1,37 @@
 import React from 'react'
-import { Link } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
+import { fetchAPI } from '../../services.js/api';
 
 const Navbar = () => {
+    const token = localStorage.getItem("token");
+    console.log(token)
+    const navigate = useNavigate();
+    const handleLogout = async (e) => {
+        try {
+            const response = await fetchAPI('logout');
+            if (response.status === 200) {
+                localStorage.removeItem('token');
+                navigate('/login');
+            }
+        } catch (error) {
+            console.error(error);
+        }
+    };
     return (
         <nav
             className="flex py-2 px-4 md:px-8 bg-white border-b border-slate-300 dark:border-neutral-700 dark:bg-neutral-900 min-h-[68px] relative z-20"
             aria-label="Main navigation">
             <div className="max-w-7xl mx-auto flex flex-wrap items-center gap-4 w-full">
-                <button  to="#"
+                <Link to="/"
                     className="min-w-9 inline-block focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 rounded">
                     <span className="sr-only">E-Store</span>
                     <img src="https://readymadeui.com/logo-alt.svg" alt="readymadeui logo" className="h-9 w-auto" />
-                </button >
+                </Link >
 
                 <form className="max-w-xl mx-auto w-full" role="search">
                     <div
                         className="flex items-center gap-2.5 px-3 py-2.5 rounded-md bg-white dark:bg-neutral-800 outline-1 -outline-offset-1 outline-slate-300 dark:outline-neutral-700 focus-within:outline-2 focus-within:-outline-offset-2 focus-within:outline-blue-600">
-                        <label  className="sr-only">Search</label>
+                        <label className="sr-only">Search</label>
                         <input type="search" id="search" placeholder="Search..." required
                             className="text-sm text-slate-900 dark:text-slate-50 w-full outline-none" />
 
@@ -34,7 +49,7 @@ const Navbar = () => {
 
                     <div
                         className="py-2 px-4 flex justify-between items-center border-b border-slate-300 sticky top-0 bg-white dark:border-neutral-700 dark:bg-neutral-900 lg:hidden max-lg:min-h-[68px]">
-                        <button  to="#"
+                        <button to="#"
                             className="inline-block focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 rounded">
                             <span className="sr-only">E-Store</span>
                             <img src="https://readymadeui.com/logo-alt.svg" alt="readymadeui logo" className="h-9 w-auto" />
@@ -56,21 +71,21 @@ const Navbar = () => {
                     <ul
                         className="flex flex-col gap-8 font-semibold text-sm text-slate-900 dark:text-slate-50 lg:flex-row max-lg:p-6 lg:ml-12">
                         <li>
-                            <Link  to="/"
+                            <Link to="/"
                                 className="hover:text-blue-700 dark:hover:text-blue-400 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 rounded"
                                 aria-current="page">Home</Link >
                         </li>
 
                         <li>
-                            <Link  to="products"
+                            <Link to="products"
                                 className="hover:text-blue-700 dark:hover:text-blue-400 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 rounded"
                                 aria-current="page">Products</Link >
                         </li>
 
                         <li>
-                            <button  to="#"
+                            <Link to="categories"
                                 className="hover:text-blue-700 dark:hover:text-blue-400 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 rounded"
-                                aria-current="page">Categories</button >
+                                aria-current="page">Categories</Link >
                         </li>
                     </ul>
                 </div>
@@ -78,7 +93,7 @@ const Navbar = () => {
                 <div className="flex items-center gap-4 ml-auto">
 
                     <div className="flex items-center gap-4 pr-2">
-                        <button  to="#"
+                        <button to="#"
                             className="flex flex-col items-center justify-center gap-0.5 text-[13px] font-semibold text-slate-900 hover:text-blue-700 dark:text-slate-50 dark:hover:text-blue-400 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 rounded">
                             <div className="relative">
                                 <svg xmlns="http://www.w3.org/2000/svg"
@@ -95,13 +110,12 @@ const Navbar = () => {
                         </button >
                     </div>
 
-
-                    <button  to="#"
-                        className="">
-                        <i className="m-3 fa-regular fa-user"></i>
-                        Login
-                    </button >
-
+                    <i className="m-3 fa-regular fa-user"></i>
+                    {token ? (
+                        <button onClick={handleLogout}>Logout</button>
+                    ) :
+                        <Link to="login"> Login </Link>
+                    }
                     <button type="button" aria-controls="collapseMenu" aria-expanded="false" aria-haspopup="true" id="toggleOpen"
                         className="cursor-pointer lg:hidden focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 rounded">
                         <span className="sr-only">Open main menu</span>
