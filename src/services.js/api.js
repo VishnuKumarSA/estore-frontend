@@ -1,6 +1,6 @@
 const BASE_URL = "http://127.0.0.1:8000/api/";
 const token = localStorage.getItem('token');
-console.log(localStorage.getItem("token"));
+console.log(token);
 
 export const fetchAPI = async (params) => {
     const response = await fetch(BASE_URL + params, {
@@ -10,13 +10,15 @@ export const fetchAPI = async (params) => {
             Authorization: `Bearer ${token}`,
         },
     });
+    
+    const data = await response.json();
 
     if (!response.ok) {
-        throw new Error("API request failed");
+        throw new Error(data.message);
     }
 
     return await {
         status: response.status,
-        data: await response.json(),
+        data:data,
     };
 };

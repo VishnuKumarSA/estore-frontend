@@ -11,6 +11,8 @@ import Register from './pages/Home/Register';
 import Categories from './pages/Home/Categories';
 import ProtectedRoute from './Routes/ProtectedRoute';
 import NotFound from './pages/Home/NotFound';
+import GuestRoute from './Routes/GuestRoute';
+import { AuthProvider } from './context/AuthContext';
 
 
 
@@ -19,27 +21,29 @@ function App() {
 
   return (
     <div>
-      <Navbar />
-      <Routes>
+      <AuthProvider>
+        <Navbar />
+        <Routes>
 
-        <Route path="/login" element={<Login />} />
-        <Route path="/register" element={<Register />} />
-        <Route path="*" element={<NotFound />} />
+          <Route element={<GuestRoute />}>
+            <Route path="/login" element={<Login />} />
+            <Route path="/register" element={<Register />} />
+          </Route>
 
-        <Route element={<ProtectedRoute />}>
+
+          <Route path="*" element={<NotFound />} />
           <Route path="/" element={<Home />} />
           <Route path="/products" element={<ProductList />} />
           <Route path="/products-details" element={<ProductDetails />} />
-          <Route path="/cart" element={<Cart />} />
-          <Route path="/checkout" element={<Checkout />} />
-
           <Route path="/categories" element={<Categories />} />
 
-        </Route>
+          <Route element={<ProtectedRoute />}>
+            <Route path="/cart" element={<Cart />} />
+            <Route path="/checkout" element={<Checkout />} />
+          </Route>
 
-
-
-      </Routes>
+        </Routes>
+      </AuthProvider>
     </div>
   );
 }

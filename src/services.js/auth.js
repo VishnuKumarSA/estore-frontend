@@ -9,12 +9,14 @@ export const authAPI = async (FormData, params) => {
         body: JSON.stringify(FormData),
     });
 
+    const data = await response.json();
+    
     if (!response.ok) {
-        throw new Error("API request failed");
+        throw new Error(data.message);
     }
 
     return await {
         status: response.status,
-        data: await response.json(),
+        data: data,
     };
 };

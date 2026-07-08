@@ -1,22 +1,21 @@
 import React from 'react'
 import { Link, useNavigate } from 'react-router-dom'
-import { fetchAPI } from '../../services.js/api';
+import { useAuth } from '../../context/AuthContext';
 
 const Navbar = () => {
-    const token = localStorage.getItem("token");
-    console.log(token)
+
     const navigate = useNavigate();
+    const { logout, token } = useAuth();
+
     const handleLogout = async (e) => {
         try {
-            const response = await fetchAPI('logout');
-            if (response.status === 200) {
-                localStorage.removeItem('token');
-                navigate('/login');
-            }
+            await logout();
+            navigate('/login');
         } catch (error) {
             console.error(error);
         }
     };
+
     return (
         <nav
             className="flex py-2 px-4 md:px-8 bg-white border-b border-slate-300 dark:border-neutral-700 dark:bg-neutral-900 min-h-[68px] relative z-20"
