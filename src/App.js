@@ -28,14 +28,15 @@ function App() {
           <Route element={<GuestRoute />}>
             <Route path="/login" element={<Login />} />
             <Route path="/register" element={<Register />} />
+
+
+
+            <Route path="*" element={<NotFound />} />
+            <Route path="/" element={<Home />} />
+            <Route path="/products" element={<ProductList />} />
+            <Route path='products/:id/:slug' element={<ProductDetails />} />
+            <Route path="/categories" element={<Categories />} />
           </Route>
-
-
-          <Route path="*" element={<NotFound />} />
-          <Route path="/" element={<Home />} />
-          <Route path="/products" element={<ProductList />} />
-          <Route path="/products-details" element={<ProductDetails />} />
-          <Route path="/categories" element={<Categories />} />
 
           <Route element={<ProtectedRoute />}>
             <Route path="/cart" element={<Cart />} />

@@ -1,6 +1,5 @@
-const BASE_URL = "http://127.0.0.1:8000/api/";
+const BASE_URL = process.env.REACT_APP_API_URL;
 const token = localStorage.getItem('token');
-console.log(token);
 
 export const fetchAPI = async (params) => {
     const response = await fetch(BASE_URL + params, {
@@ -10,7 +9,7 @@ export const fetchAPI = async (params) => {
             Authorization: `Bearer ${token}`,
         },
     });
-    
+
     const data = await response.json();
 
     if (!response.ok) {
@@ -19,6 +18,30 @@ export const fetchAPI = async (params) => {
 
     return await {
         status: response.status,
-        data:data,
+        data: data,
+    };
+};
+
+
+export const CommonAPI = async (params) => {
+    const response = await fetch(BASE_URL + params, {
+        method: 'GET',
+        headers: {
+            Accept: "application/json",
+            Authorization: `Bearer ${token}`,
+        },
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+        const error = new Error(data.message || "Request failed");
+        error.status = response.status;
+        throw error;
+    }
+
+    return await {
+        status: response.status,
+        data: data,
     };
 };

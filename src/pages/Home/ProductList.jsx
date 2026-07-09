@@ -1,7 +1,23 @@
-import React from 'react'
+import React, { useState, useEffect } from 'react'
 import SideBar from '../../components/layout/SideBar'
+import { CommonAPI } from '../../services.js/api';
 
 const ProductList = () => {
+
+    const [products, setProducts] = useState([]);
+    const API_URL = process.env.REACT_APP_IMAGE_URL;
+
+    useEffect(() => {
+        const getProducts = async () => {
+            try {
+                const response = await CommonAPI('products');
+                setProducts(response.data.data);
+            } catch (e) {
+                console.log(e);
+            }
+        }
+        getProducts();
+    }, []);
     return (
         < section className="mt-8 px-4 md:px-8" >
             <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
@@ -12,43 +28,45 @@ const ProductList = () => {
 
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
 
-                        {/* Product Card */}
-                        <div className="bg-white rounded-xl shadow hover:shadow-lg transition overflow-hidden">
+                        {products.map((product) => (
+                            <div key={product.id} className="bg-white rounded-xl shadow hover:shadow-lg transition overflow-hidden">
 
-                            <img
-                                src="https://readymadeui.com/images/laptop2.webp"
-                                alt="Laptop"
-                                className="w-full h-64 object-contain bg-gray-100 p-6"
-                            />
+                                <img
+                                    src={`${API_URL}${product.image}`}
+                                    alt="Laptop"
+                                    className="w-full h-64 object-contain bg-gray-100 p-6"
+                                />
 
-                            <div className="p-4">
+                                <div className="p-4">
 
-                                <h3 className="text-lg font-semibold">
-                                    ASUS Vivobook 15
-                                </h3>
+                                    <h3 className="text-lg font-semibold">
+                                        {product.name}
+                                    </h3>
 
-                                <p className="text-gray-500 text-sm mt-1">
-                                    Intel Core i5, 16GB RAM, 512GB SSD
-                                </p>
+                                    <p className="text-gray-500 text-sm mt-1">
+                                        {product.description}
+                                    </p>
 
-                                <div className="flex items-center justify-between mt-3">
-                                    <span className="text-2xl font-bold text-balck-500">
-                                        ₹49,999
-                                    </span>
+                                    <div className="flex items-center justify-between mt-3">
+                                        <span className="text-2xl font-bold text-balck-500">
+                                            ₹{product.price}
+                                        </span>
 
-                                    <span className="text-yellow-400 text-xl">
-                                        ★★★★☆
-                                    </span>
+                                        <span className="text-yellow-400 text-xl">
+                                            ★★★★☆
+                                        </span>
+                                    </div>
+
+                                    <button
+                                        className="w-full mt-5 bg-blue-600 hover:bg-blue-700 text-white py-2.5 rounded-lg font-medium transition">
+                                        Add to Cart
+                                    </button>
+
                                 </div>
 
-                                <button
-                                    className="w-full mt-5 bg-blue-600 hover:bg-blue-700 text-white py-2.5 rounded-lg font-medium transition">
-                                    Add to Cart
-                                </button>
-
                             </div>
+                        ))}
 
-                        </div>
 
                     </div>
 

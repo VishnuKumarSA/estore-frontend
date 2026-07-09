@@ -1,11 +1,47 @@
-import React from 'react'
+import React, { useEffect, useState } from 'react'
+import { useNavigate, useParams } from 'react-router-dom'
+import { CommonAPI } from '../../services.js/api';
 
 const ProductDetails = () => {
+
+    const { id, slug } = useParams();
+    const [details, setDetails] = useState([]);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState('');
+
+    const navigate = useNavigate();
+
+    useEffect(() => {
+        const getDetails = (async () => {
+            try {
+                const response = await CommonAPI(`products/${id}/${slug}`);
+                setDetails(response.data)
+            } catch (e) {
+                if (e.status === 404) {
+                    navigate("/not-found", { replace: true });
+                } else {
+                    setError(e.message);
+                }
+            } finally {
+                setLoading(false);
+            }
+        })
+
+        getDetails();
+
+    }, [id, slug, navigate])
+
+    if (loading) {
+        return <div className="text-center">Loading...</div>;
+    }
+
+    if (error) {
+        return <div>Something went wrong.</div>;
+    }
+
     return (
         <div>
             <section className="max-w-7xl mx-auto px-6 py-12">
-
-                {/* Breadcrumb */}
                 <div className="flex items-center gap-2 text-sm text-gray-500 mb-8">
                     <button href="#" className="hover:text-blue-600">Home</button>
                     <span>/</span>
@@ -13,23 +49,20 @@ const ProductDetails = () => {
                     <span>/</span>
                     <span className="text-gray-800">Smart Watch</span>
                 </div>
-
                 <div className="grid lg:grid-cols-2 gap-12">
 
-                    {/* Left */}
                     <div className="bg-gray-50 rounded-3xl flex justify-center items-center p-12">
                         <img
-                            src="https://images.unsplash.com/photo-1546868871-7041f2a55e12?w=700"
+                            src={`${process.env.REACT_APP_IMAGE_URL}${details.image}`}
                             alt=""
                             className="w-72 hover:scale-105 duration-300"
                         />
                     </div>
 
-                    {/* Right */}
                     <div>
 
                         <h1 className="text-3xl font-bold text-gray-900">
-                            Apple Watch Series 9
+                            {details.name}
                         </h1>
 
                         <div className="flex items-center gap-3 mt-3">
@@ -47,11 +80,11 @@ const ProductDetails = () => {
                         <div className="mt-5 flex items-center gap-3">
 
                             <h2 className="text-3xl font-bold text-blue-600">
-                                ₹2,499
+                                ₹ {details.price}
                             </h2>
 
                             <span className="text-gray-400 line-through">
-                                ₹3,999
+                                ₹{details.price}
                             </span>
 
                             <span className="bg-green-100 text-green-600 text-xs px-3 py-1 rounded-full">
@@ -61,12 +94,8 @@ const ProductDetails = () => {
                         </div>
 
                         <p className="text-gray-600 leading-7 mt-6">
-                            Premium smartwatch featuring GPS, heart rate monitoring,
-                            sleep tracking, notifications, Bluetooth calling and
-                            100+ sports modes.
+                            {details.description}
                         </p>
-
-                        {/* Quantity */}
 
                         <div className="mt-8">
 
@@ -77,7 +106,7 @@ const ProductDetails = () => {
                             <div className="flex w-fit border rounded-xl overflow-hidden">
 
                                 <button className="w-12 h-12 hover:bg-gray-100">
-                                    −
+                                    -
                                 </button>
 
                                 <span className="w-14 flex justify-center items-center">
@@ -92,8 +121,6 @@ const ProductDetails = () => {
 
                         </div>
 
-                        {/* Buttons */}
-
                         <div className="flex gap-4 mt-10">
 
                             <button className="flex-1 bg-blue-600 hover:bg-blue-700 rounded-xl py-3 text-white font-medium">
@@ -105,8 +132,6 @@ const ProductDetails = () => {
                             </button>
 
                         </div>
-
-                        {/* Highlights */}
 
                         <div className="grid grid-cols-3 gap-6 mt-10 border-t pt-8">
 
@@ -136,7 +161,6 @@ const ProductDetails = () => {
                     </div>
 
                 </div>
-
             </section>
         </div>
     )
