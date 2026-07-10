@@ -1,11 +1,13 @@
 import React from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { useAuth } from '../../context/AuthContext';
+import { useCart } from '../../context/CartContext';
 
 const Navbar = () => {
 
     const navigate = useNavigate();
     const { logout, token } = useAuth();
+    const { cartCount } = useCart();
 
     const handleLogout = async (e) => {
         try {
@@ -92,7 +94,7 @@ const Navbar = () => {
                 <div className="flex items-center gap-4 ml-auto">
 
                     <div className="flex items-center gap-4 pr-2">
-                        <button to="#"
+                        <Link to="cart"
                             className="flex flex-col items-center justify-center gap-0.5 text-[13px] font-semibold text-slate-900 hover:text-blue-700 dark:text-slate-50 dark:hover:text-blue-400 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 rounded">
                             <div className="relative">
                                 <svg xmlns="http://www.w3.org/2000/svg"
@@ -103,10 +105,10 @@ const Navbar = () => {
                                         data-original="#000000" />
                                 </svg>
                                 <span
-                                    className="absolute left-auto -ml-1 -top-0.5 rounded-full bg-red-500 px-1 py-0 text-xs text-white font-medium">3</span>
+                                    className="absolute left-auto -ml-1 -top-0.5 rounded-full bg-red-500 px-1 py-0 text-xs text-white font-medium" id="cartItemCount">{cartCount}</span>
                             </div>
                             <span>Cart</span>
-                        </button >
+                        </Link >
                     </div>
 
                     <i className="m-3 fa-regular fa-user"></i>

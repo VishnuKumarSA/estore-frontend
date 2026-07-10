@@ -1,11 +1,17 @@
 import React, { useState, useEffect } from 'react'
 import SideBar from '../../components/layout/SideBar'
 import { CommonAPI } from '../../services.js/api';
+import AuthModal from '../../components/layout/AuthModal';
+import CartSuccessModal from './Cart/CartSuccessModal';
+import { useCart } from '../../context/CartContext';
+import { Link } from 'react-router-dom';
 
 const ProductList = () => {
 
     const [products, setProducts] = useState([]);
     const API_URL = process.env.REACT_APP_IMAGE_URL;
+    const { openAuthModal, showCartSuccessModal, addToCart, setOpenAuthModal, setShowCartSuccessModal } = useCart();
+
 
     useEffect(() => {
         const getProducts = async () => {
@@ -18,6 +24,7 @@ const ProductList = () => {
         }
         getProducts();
     }, []);
+
     return (
         < section className="mt-8 px-4 md:px-8" >
             <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
@@ -29,42 +36,44 @@ const ProductList = () => {
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
 
                         {products.map((product) => (
-                            <div key={product.id} className="bg-white rounded-xl shadow hover:shadow-lg transition overflow-hidden">
+                            <Link to={`${product.id}/${product.slug}`} >
+                                <div key={product.id} className="bg-white rounded-xl shadow hover:shadow-lg transition overflow-hidden">
 
-                                <img
-                                    src={`${API_URL}${product.image}`}
-                                    alt="Laptop"
-                                    className="w-full h-64 object-contain bg-gray-100 p-6"
-                                />
+                                    <img
+                                        src={`${API_URL}${product.image}`}
+                                        alt="Laptop"
+                                        className="w-full h-64 object-contain bg-gray-100 p-6"
+                                    />
 
-                                <div className="p-4">
+                                    <div className="p-4">
 
-                                    <h3 className="text-lg font-semibold">
-                                        {product.name}
-                                    </h3>
+                                        <h3 className="text-lg font-semibold">
+                                            {product.name}
+                                        </h3>
 
-                                    <p className="text-gray-500 text-sm mt-1">
-                                        {product.description}
-                                    </p>
+                                        <p className="text-gray-500 text-sm mt-1">
+                                            {product.description}
+                                        </p>
 
-                                    <div className="flex items-center justify-between mt-3">
-                                        <span className="text-2xl font-bold text-balck-500">
-                                            ₹{product.price}
-                                        </span>
+                                        <div className="flex items-center justify-between mt-3">
+                                            <span className="text-2xl font-bold text-balck-500">
+                                                ₹{product.price}
+                                            </span>
 
-                                        <span className="text-yellow-400 text-xl">
-                                            ★★★★☆
-                                        </span>
+                                            <span className="text-yellow-400 text-xl">
+                                                ★★★★☆
+                                            </span>
+                                        </div>
+
+                                        <button
+                                            className="w-full mt-5 bg-blue-600 hover:bg-blue-700 text-white py-2.5 rounded-lg font-medium transition" onClick={() => addToCart(product.id)}>
+                                            Add to Cart
+                                        </button>
+
                                     </div>
 
-                                    <button
-                                        className="w-full mt-5 bg-blue-600 hover:bg-blue-700 text-white py-2.5 rounded-lg font-medium transition">
-                                        Add to Cart
-                                    </button>
-
                                 </div>
-
-                            </div>
+                            </Link>
                         ))}
 
 
@@ -117,6 +126,12 @@ const ProductList = () => {
 
                 </nav>
             </div>
+            <AuthModal open={openAuthModal}
+                onClose={() => setOpenAuthModal(false)} />
+            <CartSuccessModal
+                open={showCartSuccessModal}
+                onClose={() => setShowCartSuccessModal(false)}
+            />
         </section >
     )
 }
