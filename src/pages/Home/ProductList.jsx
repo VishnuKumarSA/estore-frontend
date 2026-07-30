@@ -36,9 +36,9 @@ const ProductList = () => {
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
 
                         {products.map((product) => (
-                            <Link to={`${product.id}/${product.slug}`} >
-                                <div key={product.id} className="bg-white rounded-xl shadow hover:shadow-lg transition overflow-hidden">
 
+                            <div key={product.id} className="bg-white rounded-xl shadow hover:shadow-lg transition overflow-hidden">
+                                <Link to={`${product.id}/${product.slug}`}>
                                     <img
                                         src={`${API_URL}${product.image}`}
                                         alt="Laptop"
@@ -65,15 +65,16 @@ const ProductList = () => {
                                             </span>
                                         </div>
 
-                                        <button
-                                            className="w-full mt-5 bg-blue-600 hover:bg-blue-700 text-white py-2.5 rounded-lg font-medium transition" onClick={() => addToCart(product.id)}>
-                                            Add to Cart
-                                        </button>
+
 
                                     </div>
+                                </Link>
+                                <button
+                                    className="w-full mt-5 bg-blue-600 hover:bg-blue-700 text-white py-2.5 rounded-lg font-medium transition" onClick={() => addToCart(product.id)}>
+                                    Add to Cart
+                                </button>
+                            </div>
 
-                                </div>
-                            </Link>
                         ))}
 
 

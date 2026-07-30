@@ -28,7 +28,11 @@ export const CartProvider = ({ children }) => {
                 setOpenAuthModal(true);
                 return false;
             }
-            const response = await CartAPI('cart', product_id, 1);
+            const data = {
+                product_id: product_id,
+                quantity: 1
+            }
+            const response = await CartAPI('cart', data);
             if (response.status === 201) {
                 setShowCartSuccessModal(true);
                 setCartCount(prev => prev + qty);
