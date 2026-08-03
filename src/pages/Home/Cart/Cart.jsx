@@ -1,17 +1,21 @@
 import React, { useEffect, useState } from 'react'
 import { CartAPI, CommonAPI, RemoveCartItemAPI } from '../../../services.js/api'
 import { useCart } from '../../../context/CartContext';
+import { useNavigate } from 'react-router-dom';
 
 const Cart = () => {
     const [cartDetails, setCartDetails] = useState([]);
     const { cartCount } = useCart();
+    const [error, setError] = useState('');
+    const navigate = useNavigate();
 
     const getCartdetails = (async () => {
         try {
             const response = await CommonAPI('cart');
             setCartDetails(response.data);
+            setError("");
         } catch (e) {
-            console.log(e);
+            setError(e.message);
         }
 
     })
@@ -19,27 +23,38 @@ const Cart = () => {
     const removeCart = async (cart_item_id) => {
         try {
             const res = await RemoveCartItemAPI('cart-items', cart_item_id);
+            setCartDetails(prev => ({
+                ...prev,
+                subtotal: res.data.subtotal,
+                total: res.data.total,
+                cart: {
+                    ...prev.cart,
+                    cart_items: prev.cart.cart_items.filter(item => item.id !== cart_item_id)
+                }
+            }));
         } catch (e) {
-            console.log(e);
+            setError(e.message);
         }
     }
 
     const updateCart = async (id, qty) => {
         try {
-            const data = {
-                cart_id: id,
-                quantity: qty
-            };
+            const data = { cart_id: id, quantity: qty };
             const res = await CartAPI('cart-items/' + id, data, 'PUT');
-            setCartDetails(prev =>
-                prev.map(item =>
-                    item.id === id
-                        ? { ...item, quantity: qty }
-                        : item
-                )
-            );
+
+            setCartDetails(prev => ({
+                ...prev,
+                subtotal: res.data.subtotal,
+                total: res.data.total,
+                cart: {
+                    ...prev.cart,
+                    cart_items: prev.cart.cart_items.map(item =>
+                        item.id === id ? { ...item, quantity: qty } : item
+                    )
+                }
+            }));
         } catch (e) {
-            console.log(e);
+            setError(e.message);
         }
     }
 
@@ -47,7 +62,7 @@ const Cart = () => {
         getCartdetails();
     }, [])
 
-    console.log(cartDetails);
+
 
     return (
         <div>
@@ -58,9 +73,64 @@ const Cart = () => {
                         <p className="text-base text-slate-900 font-medium dark:text-slate-50">{cartCount} Items</p>
                     </div>
 
-                    <div className="grid lg:grid-cols-3 gap-12">
+                    {cartDetails?.cart?.cart_items?.length === 0 ? (
+                        <div className="flex min-h-[500px] flex-col items-center justify-center rounded-2xl border border-dashed border-slate-300 bg-slate-50 p-10 text-center dark:border-neutral-700 dark:bg-neutral-900">
+                            <div className="mb-6 flex h-24 w-24 items-center justify-center rounded-full bg-blue-100">
+                                <svg
+                                    xmlns="http://www.w3.org/2000/svg"
+                                    className="h-12 w-12 text-blue-600"
+                                    fill="none"
+                                    viewBox="0 0 24 24"
+                                    stroke="currentColor"
+                                >
+                                    <path
+                                        strokeLinecap="round"
+                                        strokeLinejoin="round"
+                                        strokeWidth={1.5}
+                                        d="M3 3h2l.4 2M7 13h10l4-8H5.4"
+                                    />
+                                </svg>
+                            </div>
+
+                            <h2 className="text-3xl font-bold text-slate-900 dark:text-white">
+                                Your cart is empty
+                            </h2>
+
+                            <p className="mt-3 max-w-md text-slate-500 dark:text-slate-400">
+                                Looks like you haven't added any products yet.
+                                Browse our collection and find something you'll love.
+                            </p>
+
+                            <button
+                                onClick={() => navigate("/products")}
+                                className="mt-8 rounded-lg bg-blue-600 px-8 py-3 font-semibold text-white transition hover:bg-blue-700"
+                            >
+                                Continue Shopping
+                            </button>
+                        </div>
+                    ) : (<div className="grid lg:grid-cols-3 gap-12">
                         <ul className="lg:col-span-2 divide-y divide-slate-300 dark:divide-neutral-700">
-                           {cartDetails?.cart?.cart_items?.map((cartDetail) => (
+                            {cartDetails?.cart?.cart_items?.length > 0 && error && (
+                                <div className="mb-4 flex items-center gap-3 rounded-lg border border-red-200 bg-red-50 p-4 text-red-700 shadow-sm">
+                                    <svg
+                                        xmlns="http://www.w3.org/2000/svg"
+                                        className="h-5 w-5 flex-shrink-0"
+                                        fill="none"
+                                        viewBox="0 0 24 24"
+                                        stroke="currentColor"
+                                    >
+                                        <path
+                                            strokeLinecap="round"
+                                            strokeLinejoin="round"
+                                            strokeWidth={2}
+                                            d="M12 9v2m0 4h.01M10.29 3.86l-8 14A1 1 0 003.17 19h17.66a1 1 0 00.88-1.5l-8-14a1 1 0 00-1.76 0z"
+                                        />
+                                    </svg>
+
+                                    <span>{error}</span>
+                                </div>
+                            )}
+                            {cartDetails?.cart?.cart_items?.map((cartDetail) => (
                                 <li key={cartDetail.id} className="flex flex-col gap-6 py-6 sm:items-center sm:flex-row">
                                     <div className="w-32 h-full shrink-0">
                                         <img src={`${process.env.REACT_APP_IMAGE_URL}${cartDetail.product.image}`}
@@ -167,7 +237,7 @@ const Cart = () => {
 
 
                             <div className="mt-6 space-y-3 text-center">
-                                <button type="button"
+                                <button type="button" onClick={() =>navigate('/checkout')}
                                     className="w-full px-4 py-2.5 text-white text-sm font-semibold rounded-md cursor-pointer bg-blue-600 hover:bg-blue-700 border border-blue-600 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500">Proceed
                                     to Checkout</button>
                                 <button href="#"
@@ -190,6 +260,7 @@ const Cart = () => {
                             </form>
                         </div>
                     </div>
+                    )}
                 </div>
             </main>
         </div>

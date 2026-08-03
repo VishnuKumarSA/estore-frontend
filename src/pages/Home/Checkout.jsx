@@ -1,6 +1,179 @@
-import React from 'react'
+import React, { useEffect, useState } from 'react'
+import { CartAPI, CommonAPI } from '../../services.js/api';
+import { useNavigate } from 'react-router-dom';
 
 const Checkout = () => {
+
+    const [cartDetails, setCartDetails] = useState([]);
+    const [error, setError] = useState('');
+    const [showErrorModal, setShowErrorModal] = useState(false);
+    const [showSuccessModal, setShowSuccessModal] = useState(false);
+    const [orderNumber, setOrderNumber] = useState("");
+    const navigate = useNavigate();
+
+    const initialFormData = {
+        first_name: "",
+        last_name: "",
+        email: "",
+        mobile_number: "",
+        address: "",
+        city: "",
+        state: "",
+        postal_code: "",
+        payment_method: "COD"
+    };
+
+    const [formData, setFormData] = useState(initialFormData)
+
+
+    const getCartdetails = async () => {
+        const response = await CommonAPI("cart");
+        setCartDetails(response.data);
+    };
+
+    const handleInputChanges = (e) => {
+        setFormData((prev) => ({ ...prev, [e.target.name]: e.target.value }));
+    }
+
+    const HandleFormSubmit = async (e) => {
+        e.preventDefault();
+        try {
+            const res = await CartAPI('orders', formData);
+            if (res.status === 201) {
+                setOrderNumber(res.data.order.order_number);
+                setShowSuccessModal(true);
+
+                setFormData(initialFormData);
+                getCartdetails();
+            }
+        } catch (e) {
+            setError(e.message);
+            setShowErrorModal(true);
+        }
+    }
+
+    const openRazorpay = async () => {
+
+        try {
+
+            const response = await CartAPI("payment/create-order", {
+                amount: cartDetails.total
+            });
+
+            const options = {
+
+                key: response.data.key,
+
+                amount: response.data.order.amount,
+
+                currency: response.data.order.currency,
+
+                name: "eStore",
+
+                description: "Order Payment",
+
+                image: "/logo.png", // Optional (remove if no logo)
+
+                order_id: response.data.order.id,
+
+                prefill: {
+                    name: `${formData.first_name} ${formData.last_name}`,
+                    email: formData.email,
+                    contact: formData.mobile_number,
+                },
+
+                theme: {
+                    color: "#2563eb",
+                },
+
+                handler: async function (payment) {
+
+                    try {
+
+                        const verify = await CartAPI("payment/verify", {
+                            razorpay_order_id: payment.razorpay_order_id,
+                            razorpay_payment_id: payment.razorpay_payment_id,
+                            razorpay_signature: payment.razorpay_signature,
+                        });
+
+                        if (!verify.data.success) {
+                            alert("Payment verification failed.");
+                            return;
+                        }
+
+                        const order = await CartAPI("orders", {
+
+                            ...formData,
+
+                            payment_method: "UPI",
+
+                            razorpay_order_id: payment.razorpay_order_id,
+
+                            razorpay_payment_id: payment.razorpay_payment_id,
+
+                            razorpay_signature: payment.razorpay_signature,
+
+                        });
+
+                        if (order.status === 201) {
+
+                            setOrderNumber(order.data.order.order_number);
+
+                            setShowSuccessModal(true);
+
+                            setFormData(initialFormData);
+
+                            getCartdetails();
+
+                        }
+
+                    } catch (error) {
+
+                        console.error(error);
+
+                        alert("Order creation failed.");
+
+                    }
+
+                },
+
+                modal: {
+                    ondismiss: function () {
+                        console.log("Payment popup closed");
+                    }
+                }
+
+            };
+
+            const razorpay = new window.Razorpay(options);
+
+            razorpay.on("payment.failed", function (response) {
+
+                console.error(response.error);
+
+                alert(
+                    "Payment Failed\n\n" +
+                    response.error.description
+                );
+
+            });
+
+            razorpay.open();
+
+        } catch (error) {
+
+            console.error(error);
+
+            alert("Unable to initiate payment.");
+
+        }
+
+    };
+
+
+    useEffect(() => {
+        getCartdetails();
+    }, [])
     return (
         <div>
             <main>
@@ -8,8 +181,8 @@ const Checkout = () => {
                 <div className="px-4 md:px-8 mt-6">
                     <div className="max-w-xl md:max-w-7xl mx-auto">
 
-                       
-                        <ol className="flex items-start max-w-4xl mb-16" aria-label="Progress">
+
+                        <ol className="flex items-start max-w-7xl mb-16" aria-label="Progress">
 
                             <li className="w-full">
                                 <div className="flex items-center w-full relative">
@@ -58,171 +231,284 @@ const Checkout = () => {
                             </li>
 
                         </ol>
+                        <form onSubmit={HandleFormSubmit} >
+                            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-y-12 gap-x-8 lg:gap-x-12">
+                                <div className="lg:col-span-2">
 
-                        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-y-12 gap-x-8 lg:gap-x-12">
-                            <div className="lg:col-span-2">
-                                
-                                <section className="w-full h-max">
-                                    <form>
+                                    <section className="w-full h-max">
+
                                         <fieldset>
                                             <legend className="text-xl text-slate-900 font-semibold mb-6 dark:text-slate-50">Delivery
                                                 Details
                                             </legend>
                                             <div className="grid lg:grid-cols-2 gap-6">
                                                 <div>
-                                                    <label for="fname"
+                                                    <label htmlFor="fname"
                                                         className="mb-2 text-slate-900 font-medium text-sm inline-block dark:text-slate-50">First
                                                         Name</label>
-                                                    <input type="text" id="fname" name="fname" placeholder="John" required
+                                                    <input type="text" onChange={handleInputChanges} id="first_name" name="first_name" placeholder="John" value={formData.first_name} required
                                                         className="px-3 py-2.5 text-sm text-slate-900 rounded-md bg-white w-full outline-1 -outline-offset-1 outline-slate-300 focus:outline-2 focus:-outline-offset-2 focus:outline-blue-600 dark:text-slate-50 dark:bg-neutral-800 dark:outline-neutral-700" />
                                                 </div>
                                                 <div>
-                                                    <label for="lname"
+                                                    <label htmlFor="last_name"
                                                         className="mb-2 text-slate-900 font-medium text-sm inline-block dark:text-slate-50">Last
                                                         Name</label>
-                                                    <input type="text" id="lname" name="lname" placeholder="Doe" required
+                                                    <input type="text" onChange={handleInputChanges} id="last_name" name="last_name" value={formData.last_name} placeholder="Doe" required
                                                         className="px-3 py-2.5 text-sm text-slate-900 rounded-md bg-white w-full outline-1 -outline-offset-1 outline-slate-300 focus:outline-2 focus:-outline-offset-2 focus:outline-blue-600 dark:text-slate-50 dark:bg-neutral-800 dark:outline-neutral-700" />
                                                 </div>
                                                 <div>
-                                                    <label for="email"
+                                                    <label htmlFor="email"
                                                         className="mb-2 text-slate-900 font-medium text-sm inline-block dark:text-slate-50">Email</label>
-                                                    <input type="email" id="email" name="email" placeholder="john@readymadeui.com"
+                                                    <input onChange={handleInputChanges} type="email" id="email" name="email" placeholder="john@readymadeui.com" value={formData.email}
                                                         required
                                                         className="px-3 py-2.5 text-sm text-slate-900 rounded-md bg-white w-full outline-1 -outline-offset-1 outline-slate-300 focus:outline-2 focus:-outline-offset-2 focus:outline-blue-600 dark:text-slate-50 dark:bg-neutral-800 dark:outline-neutral-700" />
                                                 </div>
                                                 <div>
-                                                    <label for="mobile"
+                                                    <label htmlFor="mobile_number"
                                                         className="mb-2 text-slate-900 font-medium text-sm inline-block dark:text-slate-50">Mobile
                                                         Number</label>
-                                                    <input type="tel" id="mobile" name="mobile" placeholder="123-456-7890" required
+                                                    <input type="tel" onChange={handleInputChanges} id="mobile_number" name="mobile_number" value={formData.mobile_number} placeholder="123-456-7890" required
                                                         className="px-3 py-2.5 text-sm text-slate-900 rounded-md bg-white w-full outline-1 -outline-offset-1 outline-slate-300 focus:outline-2 focus:-outline-offset-2 focus:outline-blue-600 dark:text-slate-50 dark:bg-neutral-800 dark:outline-neutral-700" />
                                                 </div>
                                                 <div>
-                                                    <label for="address"
+                                                    <label htmlFor="address"
                                                         className="mb-2 text-slate-900 font-medium text-sm inline-block dark:text-slate-50">Address
                                                         Line</label>
-                                                    <input type="text" id="address" name="address" placeholder="123 Main Street"
+                                                    <input type="text" onChange={handleInputChanges} id="address" name="address" placeholder="123 Main Street" value={formData.address}
                                                         required
                                                         className="px-3 py-2.5 text-sm text-slate-900 rounded-md bg-white w-full outline-1 -outline-offset-1 outline-slate-300 focus:outline-2 focus:-outline-offset-2 focus:outline-blue-600 dark:text-slate-50 dark:bg-neutral-800 dark:outline-neutral-700" />
                                                 </div>
                                                 <div>
-                                                    <label for="city"
+                                                    <label htmlFor="city"
                                                         className="mb-2 text-slate-900 font-medium text-sm inline-block dark:text-slate-50">City</label>
-                                                    <input type="text" id="city" name="city" placeholder="New York" required
+                                                    <input type="text" onChange={handleInputChanges} id="city" name="city" placeholder="New York" value={formData.city} required
                                                         className="px-3 py-2.5 text-sm text-slate-900 rounded-md bg-white w-full outline-1 -outline-offset-1 outline-slate-300 focus:outline-2 focus:-outline-offset-2 focus:outline-blue-600 dark:text-slate-50 dark:bg-neutral-800 dark:outline-neutral-700" />
                                                 </div>
                                                 <div>
-                                                    <label for="state"
+                                                    <label htmlFor="state"
                                                         className="mb-2 text-slate-900 font-medium text-sm inline-block dark:text-slate-50">State</label>
-                                                    <input type="text" id="state" name="state" placeholder="NY" required
+                                                    <input type="text" onChange={handleInputChanges} id="state" value={formData.state} name="state" placeholder="NY" required
                                                         className="px-3 py-2.5 text-sm text-slate-900 rounded-md bg-white w-full outline-1 -outline-offset-1 outline-slate-300 focus:outline-2 focus:-outline-offset-2 focus:outline-blue-600 dark:text-slate-50 dark:bg-neutral-800 dark:outline-neutral-700" />
                                                 </div>
                                                 <div>
-                                                    <label for="postal-code"
+                                                    <label htmlFor="postal_code"
                                                         className="mb-2 text-slate-900 font-medium text-sm inline-block dark:text-slate-50">Postal
                                                         code</label>
-                                                    <input type="text" id="postal-code" name="postal-code" placeholder="10001"
+                                                    <input type="text" onChange={handleInputChanges} id="postal_code" value={formData.postal_code} name="postal_code" placeholder="10001"
                                                         required
                                                         className="px-3 py-2.5 text-sm text-slate-900 rounded-md bg-white w-full outline-1 -outline-offset-1 outline-slate-300 focus:outline-2 focus:-outline-offset-2 focus:outline-blue-600 dark:text-slate-50 dark:bg-neutral-800 dark:outline-neutral-700" />
                                                 </div>
                                             </div>
                                         </fieldset>
 
-                                       
-                                        <fieldset className="mt-12">
-                                            <legend className="text-xl text-slate-900 font-semibold mb-6 dark:text-slate-50">Payment
-                                                method
-                                            </legend>
-                                            <div className="grid gap-4 lg:grid-cols-2">
-                                                <div className="flex items-center">
-                                                    <input type="radio" name="method" id="card"
-                                                        className="w-[18px] h-[18px] appearance-none rounded-full border border-slate-300 bg-white focus:outline-blue-500 checked:ring-2 checked:ring-inset checked:ring-white checked:bg-blue-600 dark:checked:ring-neutral-900 dark:bg-neutral-800 dark:border-neutral-700 dark:checked:bg-blue-600"
-                                                        checked />
-                                                    <label for="card" className="ml-4 flex gap-2 cursor-pointer">
-                                                        <img src="https://readymadeui.com/images/visa.webp" className="w-12"
-                                                            alt="visa" />
-                                                        <img src="https://readymadeui.com/images/american-express.webp" className="w-12"
-                                                            alt="american-express" />
-                                                        <img src="https://readymadeui.com/images/master.webp" className="w-12"
-                                                            alt="master" />
-                                                    </label>
-                                                </div>
 
-                                                <div className="flex items-center">
-                                                    <input type="radio" name="method" id="paypal"
-                                                        className="w-[18px] h-[18px] appearance-none rounded-full border border-slate-300 bg-white focus:outline-blue-500 checked:ring-2 checked:ring-inset checked:ring-white checked:bg-blue-600 dark:checked:ring-neutral-900 dark:bg-neutral-800 dark:border-neutral-700 dark:checked:bg-blue-600" />
-                                                    <label for="paypal" className="ml-4 flex gap-2 cursor-pointer">
-                                                        <img src="https://readymadeui.com/images/paypal.webp" className="w-20"
-                                                            alt="paypalCard" />
-                                                    </label>
-                                                </div>
+                                        <fieldset className="mt-12 border-t border-slate-200 pt-8">
+                                            <legend className="text-xl font-semibold text-slate-900 mb-6">
+                                                Payment Method
+                                            </legend>
+
+                                            <div className="grid gap-5 md:grid-cols-2">
+
+
+                                                <label
+                                                    htmlFor="COD"
+                                                    className={`flex items-center justify-between rounded-xl border-2 p-6 cursor-pointer transition-all duration-200
+                                                ${formData.payment_method === "COD"
+                                                            ? "border-blue-600 bg-blue-50"
+                                                            : "border-slate-200 hover:border-blue-400 hover:bg-slate-50"}`}
+                                                >
+                                                    <div className="flex items-center gap-4">
+                                                        <input
+                                                            type="radio"
+                                                            id="COD"
+                                                            name="payment_method"
+                                                            value="COD"
+                                                            checked={formData.payment_method === "COD"}
+                                                            onChange={handleInputChanges}
+                                                            className="h-5 w-5 accent-blue-600"
+                                                        />
+
+                                                        <div>
+                                                            <p className="font-semibold text-slate-800">
+                                                                Cash on Delivery
+                                                            </p>
+                                                            <p className="text-sm text-slate-500">
+                                                                Pay when your order arrives
+                                                            </p>
+                                                        </div>
+                                                    </div>
+
+                                                    <span className="text-2xl">💵</span>
+                                                </label>
+
+
+                                                <label
+                                                    htmlFor="UPI"
+                                                    className={`flex items-center justify-between rounded-xl border-2 p-6 cursor-pointer transition-all duration-200
+                                                ${formData.payment_method === "UPI"
+                                                            ? "border-blue-600 bg-blue-50"
+                                                            : "border-slate-200 hover:border-blue-400 hover:bg-slate-50"}`}
+                                                >
+                                                    <div className="flex items-center gap-4">
+                                                        <input
+                                                            type="radio"
+                                                            id="UPI"
+                                                            name="payment_method"
+                                                            value="UPI"
+                                                            checked={formData.payment_method === "UPI"}
+                                                            onChange={handleInputChanges}
+                                                            className="h-5 w-5 accent-blue-600"
+                                                        />
+
+                                                        <div>
+                                                            <img
+                                                                src="https://upload.wikimedia.org/wikipedia/commons/e/e1/UPI-Logo-vector.svg"
+                                                                alt="UPI"
+                                                                className="h-8"
+                                                            />
+
+                                                            <p className="mt-2 text-sm text-slate-500">
+                                                                Google Pay, PhonePe, Paytm & more
+                                                            </p>
+                                                        </div>
+                                                    </div>
+                                                </label>
                                             </div>
                                         </fieldset>
 
-                                       
-                                        <label className="inline-flex items-center group has-[input:checked]:text-slate-900 mt-6">
-                                            <input id="billing-address" name="billing-address" type="checkbox" required
-                                                className="sr-only" checked />
-                                           
-                                            <span
-                                                className="flex h-4 w-4 shrink-0 items-center justify-center rounded outline-1 outline-slate-300 dark:outline-neutral-700 bg-white dark:bg-neutral-800 group-has-[input:checked]:bg-blue-600 group-has-[input:checked]:outline-blue-600 group-focus-within:outline-2 group-focus-within:outline-blue-600"
-                                                aria-hidden="true">
-                                                
-                                                <svg className="size-3 text-white opacity-0 group-has-[input:checked]:opacity-100"
-                                                    viewBox="0 0 12 10" fill="none" stroke="currentColor" stroke-width="2">
-                                                    <path d="M1 5l3 3 7-7" />
-                                                </svg>
-                                            </span>
-                                            <span className="ml-3 text-sm text-slate-700 dark:text-slate-300">
-                                                Billing address is the same as shipping address
-                                            </span>
-                                        </label>
-                                    </form>
+                                    </section>
+                                </div>
 
-                                    
-                                    <form className="max-w-sm mt-8">
-                                        <label for="promocode"
-                                            className="mb-2 block text-sm font-medium text-slate-900 dark:text-slate-50">Do you
-                                            have a promo code?</label>
-                                        <div className="flex flex-col gap-4 sm:items-center sm:flex-row">
-                                            <input type="text" id="promocode" name="promocode" required
-                                                placeholder="Enter promo code"
-                                                className="px-3 py-2.5 text-sm text-slate-900 rounded-md bg-white w-full outline-1 -outline-offset-1 outline-slate-300 focus:outline-2 focus:-outline-offset-2 focus:outline-blue-600 dark:text-slate-50 dark:bg-neutral-800 dark:outline-neutral-700" />
-                                            <button type="submit"
-                                                className="py-2 px-3.5 text-sm w-max rounded-md font-semibold cursor-pointer text-white border border-blue-600 bg-blue-600 hover:bg-blue-700 transition-all focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500">Apply</button>
-                                        </div>
-                                    </form>
-                                </section>
-                            </div>
 
-                            
-                            <div className="relative h-max md:sticky top-0">
-                                <h2 className="text-xl text-slate-900 font-semibold mb-6 dark:text-slate-50">Order Summary</h2>
-                                <ul className="text-slate-500 font-medium space-y-4 dark:text-slate-400">
-                                    <li className="flex flex-wrap gap-4 text-sm">Subtotal <span
-                                        className="ml-auto font-semibold text-slate-900 dark:text-slate-50">$72.00</span></li>
-                                    <li className="flex flex-wrap gap-4 text-sm">Discount <span
-                                        className="ml-auto font-semibold text-slate-900 dark:text-slate-50">$0.00</span></li>
-                                    <li className="flex flex-wrap gap-4 text-sm">Shipping <span
-                                        className="ml-auto font-semibold text-slate-900 dark:text-slate-50">$6.00</span></li>
-                                    <li className="flex flex-wrap gap-4 text-sm">Tax <span
-                                        className="ml-auto font-semibold text-slate-900 dark:text-slate-50">$5.00</span></li>
-                                    <hr className="border-slate-300 dark:border-neutral-700" />
-                                    <li className="flex flex-wrap gap-4 text-sm font-semibold text-slate-900 dark:text-slate-50">Total
-                                        <span className="ml-auto dark:text-slate-50">$83.00</span>
-                                    </li>
-                                </ul>
-                                <div className="mt-6">
-                                    <button type="button"
-                                        className="w-full px-3.5 py-2 text-white text-sm font-semibold rounded-md cursor-pointer bg-blue-600 hover:bg-blue-700 border border-blue-600 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500">Pay
-                                        now</button>
+                                <div className="relative h-max md:sticky top-0">
+                                    <h2 className="text-xl text-slate-900 font-semibold mb-6 dark:text-slate-50">Order Summary</h2>
+                                    <ul className="text-slate-500 font-medium space-y-4 dark:text-slate-400">
+                                        <li className="flex flex-wrap gap-4 text-sm">Subtotal <span
+                                            className="ml-auto font-semibold text-slate-900 dark:text-slate-50">${cartDetails.subtotal}</span></li>
+                                        <li className="flex flex-wrap gap-4 text-sm">Discount <span
+                                            className="ml-auto font-semibold text-slate-900 dark:text-slate-50">No Discount</span></li>
+                                        <li className="flex flex-wrap gap-4 text-sm">Shipping <span
+                                            className="ml-auto font-semibold text-slate-900 dark:text-slate-50">Free</span></li>
+                                        <li className="flex flex-wrap gap-4 text-sm">Tax <span
+                                            className="ml-auto font-semibold text-slate-900 dark:text-slate-50">Free</span></li>
+                                        <hr className="border-slate-300 dark:border-neutral-700" />
+                                        <li className="flex flex-wrap gap-4 text-sm font-semibold text-slate-900 dark:text-slate-50">Total
+                                            <span className="ml-auto dark:text-slate-50">{cartDetails.total}</span>
+                                        </li>
+                                    </ul>
+                                    <div className="mt-6">
+                                        {formData.payment_method === "COD" ? (
+                                            <button
+                                                type="submit"
+                                                className="w-full px-3.5 py-2 text-white text-sm font-semibold rounded-md cursor-pointer bg-blue-600 hover:bg-blue-700 border border-blue-600 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
+                                            >
+                                                Place Order
+                                            </button>
+                                        ) : (
+                                            <button
+                                                type="button"
+                                                onClick={openRazorpay}
+                                                className="w-full px-3.5 py-2 text-white text-sm font-semibold rounded-md cursor-pointer bg-blue-600 hover:bg-blue-700 border border-blue-600 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
+                                            >
+                                                Pay Now
+                                            </button>
+                                        )}
+                                    </div>
                                 </div>
                             </div>
-                        </div>
+                        </form>
                     </div>
                 </div>
-            </main>
-        </div>
+
+                {showErrorModal && (
+                    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 px-4">
+                        <div className="w-full max-w-md rounded-xl bg-white shadow-xl">
+
+                            <div className="border-b border-slate-200 px-6 py-4">
+                                <h2 className="text-xl font-semibold text-red-600">
+                                    Error
+                                </h2>
+                            </div>
+
+                            <div className="px-6 py-5">
+                                <p className="text-slate-700">
+                                    {error}
+                                </p>
+                            </div>
+
+                            <div className="flex justify-end gap-3 border-t border-slate-200 px-6 py-4">
+                                <button
+                                    onClick={() => setShowErrorModal(false)}
+                                    className="rounded-lg bg-red-600 px-5 py-2 text-white hover:bg-red-700"
+                                >
+                                    OK
+                                </button>
+                            </div>
+
+                        </div>
+                    </div>
+                )}
+
+                {showSuccessModal && (
+                    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 px-4">
+                        <div className="w-full max-w-md rounded-xl bg-white shadow-xl">
+
+                            <div className="border-b border-slate-200 px-6 py-4 text-center">
+                                <div className="mx-auto mb-3 flex h-16 w-16 items-center justify-center rounded-full bg-green-100">
+                                    <svg
+                                        xmlns="http://www.w3.org/2000/svg"
+                                        className="h-8 w-8 text-green-600"
+                                        fill="none"
+                                        viewBox="0 0 24 24"
+                                        stroke="currentColor"
+                                    >
+                                        <path
+                                            strokeLinecap="round"
+                                            strokeLinejoin="round"
+                                            strokeWidth={2}
+                                            d="M5 13l4 4L19 7"
+                                        />
+                                    </svg>
+                                </div>
+
+                                <h2 className="text-2xl font-bold text-green-600">
+                                    Order Placed!
+                                </h2>
+                            </div>
+
+                            <div className="px-6 py-5 text-center">
+                                <p className="text-slate-700">
+                                    Thank you for your purchase.
+                                </p>
+
+                                <p className="mt-2 text-sm text-slate-500">
+                                    Your order has been placed successfully.
+                                </p>
+
+                                {orderNumber && (
+                                    <p className="mt-4 font-semibold text-slate-800">
+                                        Order ID: {orderNumber}
+                                    </p>
+                                )}
+                            </div>
+
+                            <div className="flex justify-center gap-3 border-t border-slate-200 px-6 py-4">
+                                <button
+                                    onClick={() => {
+                                        setShowSuccessModal(false);
+                                        navigate("/orders");
+                                    }}
+                                    className="rounded-lg bg-green-600 px-6 py-2 text-white hover:bg-green-700"
+                                >
+                                    View Orders
+                                </button>
+                            </div>
+
+                        </div>
+                    </div>
+                )}
+            </main >
+        </div >
     )
 }
 

@@ -14,6 +14,7 @@ import GuestRoute from './Routes/GuestRoute';
 import { AuthProvider } from './context/AuthContext';
 import Cart from './pages/Home/Cart/Cart';
 import { CartProvider } from './context/CartContext';
+import Footer from './components/layout/Footer';
 
 
 
@@ -43,6 +44,7 @@ function App() {
               <Route path="/checkout" element={<Checkout />} />
             </Route>
           </Routes>
+          <Footer/>
         </CartProvider>
       </AuthProvider>
     </div>
