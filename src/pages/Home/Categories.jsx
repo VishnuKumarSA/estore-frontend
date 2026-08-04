@@ -8,7 +8,7 @@ const Categories = () => {
     useEffect(() => {
         const getCategories = async () => {
             try {
-                const response = await CommonAPI('category');
+                const response = await CommonAPI('categories');
                 setCategories(response.data);
             } catch (e) {
                 console.log(e);
