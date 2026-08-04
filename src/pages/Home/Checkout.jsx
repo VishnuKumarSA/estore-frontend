@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react'
 import { CartAPI, CommonAPI } from '../../services.js/api';
 import { useNavigate } from 'react-router-dom';
+import { useCart } from '../../context/CartContext';
 
 const Checkout = () => {
 
@@ -10,6 +11,7 @@ const Checkout = () => {
     const [showSuccessModal, setShowSuccessModal] = useState(false);
     const [orderNumber, setOrderNumber] = useState("");
     const navigate = useNavigate();
+    const { fetchCartCount } = useCart();
 
     const initialFormData = {
         first_name: "",
@@ -40,6 +42,7 @@ const Checkout = () => {
         try {
             const res = await CartAPI('orders', formData);
             if (res.status === 201) {
+                await fetchCartCount();
                 setOrderNumber(res.data.order.order_number);
                 setShowSuccessModal(true);
 
@@ -117,6 +120,8 @@ const Checkout = () => {
 
                         if (order.status === 201) {
 
+                            await fetchCartCount();
+                            
                             setOrderNumber(order.data.order.order_number);
 
                             setShowSuccessModal(true);

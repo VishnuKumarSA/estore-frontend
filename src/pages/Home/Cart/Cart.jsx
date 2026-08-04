@@ -8,6 +8,7 @@ const Cart = () => {
     const { cartCount } = useCart();
     const [error, setError] = useState('');
     const navigate = useNavigate();
+    const {fetchCartCount} = useCart();
 
     const getCartdetails = (async () => {
         try {
@@ -32,6 +33,7 @@ const Cart = () => {
                     cart_items: prev.cart.cart_items.filter(item => item.id !== cart_item_id)
                 }
             }));
+            await fetchCartCount();
         } catch (e) {
             setError(e.message);
         }
@@ -53,6 +55,7 @@ const Cart = () => {
                     )
                 }
             }));
+            await fetchCartCount();
         } catch (e) {
             setError(e.message);
         }

@@ -1,6 +1,6 @@
 import { createContext, useContext, useEffect, useState } from "react";
 import { authAPI } from "../services.js/auth";
-import { fetchAPI } from "../services.js/api";
+import { CommonAPI, fetchAPI } from "../services.js/api";
 
 export const AuthContext = createContext();
 
@@ -21,7 +21,7 @@ export const AuthProvider = ({ children }) => {
       }
 
       try {
-        const res = await fetchAPI("user");
+        const res = await CommonAPI("user");
         setUser(res.data);
       } catch (e) {
 

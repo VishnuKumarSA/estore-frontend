@@ -15,6 +15,7 @@ import { AuthProvider } from './context/AuthContext';
 import Cart from './pages/Home/Cart/Cart';
 import { CartProvider } from './context/CartContext';
 import Footer from './components/layout/Footer';
+import OrderList from './pages/Home/OrderList';
 
 
 
@@ -42,6 +43,7 @@ function App() {
             <Route element={<ProtectedRoute />}>
               <Route path="/cart" element={<Cart />} />
               <Route path="/checkout" element={<Checkout />} />
+              <Route path="/orders" element={<OrderList />} />
             </Route>
           </Routes>
           <Footer/>

@@ -35,7 +35,8 @@ export const CartProvider = ({ children }) => {
             const response = await CartAPI('cart', data);
             if (response.status === 201) {
                 setShowCartSuccessModal(true);
-                setCartCount(prev => prev + qty);
+                await fetchCartCount();
+
             }
 
         } catch (e) {
