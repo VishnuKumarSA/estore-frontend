@@ -88,6 +88,13 @@ const Navbar = () => {
                                 className="hover:text-blue-700 dark:hover:text-blue-400 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 rounded"
                                 aria-current="page">Categories</Link >
                         </li>
+                        {token && <li>
+                            <Link to="orders"
+                                className="hover:text-blue-700 dark:hover:text-blue-400 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 rounded"
+                                aria-current="page">My Orders</Link >
+                        </li>
+                        }
+
                     </ul>
                 </div>
 

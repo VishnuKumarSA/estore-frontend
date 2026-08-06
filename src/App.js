@@ -16,6 +16,11 @@ import Cart from './pages/Home/Cart/Cart';
 import { CartProvider } from './context/CartContext';
 import Footer from './components/layout/Footer';
 import OrderList from './pages/Home/OrderList';
+import OrderDetails from './pages/Home/OrderDetails';
+import { ToastContainer } from 'react-toastify';
+import "react-toastify/dist/ReactToastify.css";
+import TrackOrder from './pages/Home/TrackOrder';
+
 
 
 
@@ -24,6 +29,7 @@ function App() {
 
   return (
     <div>
+      <ToastContainer position="top-right" />
       <AuthProvider>
         <CartProvider>
           <Navbar />
@@ -33,7 +39,7 @@ function App() {
               <Route path="/register" element={<Register />} />
             </Route>
 
-           
+
             <Route path="/" element={<Home />} />
             <Route path="/products" element={<ProductList />} />
             <Route path='/products/:id/:slug' element={<ProductDetails />} />
@@ -44,9 +50,11 @@ function App() {
               <Route path="/cart" element={<Cart />} />
               <Route path="/checkout" element={<Checkout />} />
               <Route path="/orders" element={<OrderList />} />
+              <Route path="/orders/:id" element={<OrderDetails />} />
+              <Route path="/orders/track-order/:id" element={<TrackOrder />} />
             </Route>
           </Routes>
-          <Footer/>
+          <Footer />
         </CartProvider>
       </AuthProvider>
     </div>
