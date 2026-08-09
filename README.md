@@ -1,70 +1,198 @@
-# Getting Started with Create React App
+# E-Store — React Frontend
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+A full-stack **E-Commerce frontend application built with React**, integrated with a Laravel REST API backend.
 
-## Available Scripts
+This project was developed to strengthen practical React skills by building a real-world E-Commerce application and integrating it with a Laravel backend.
 
-In the project directory, you can run:
+## 🚀 Project Overview
 
-### `npm start`
+E-Store provides a complete shopping experience with product browsing, authentication, cart management, order processing and Razorpay payment integration.
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
+The React frontend communicates with the Laravel backend through REST APIs using the **Fetch API**.
 
-The page will reload when you make changes.\
-You may also see any lint errors in the console.
+## ✨ Key Features
 
-### `npm test`
+### Customer Features
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+* User registration and login
+* Authentication
+* Product listing
+* Product details
+* Shopping cart
+* Add, update and remove cart items
+* Quantity management
+* Stock validation
+* Order creation
+* Razorpay payment integration
 
-### `npm run build`
+### React Features
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+* Functional components
+* React Hooks
+* React Context API
+* Global state management using Context
+* Reusable components
+* Fetch API for REST API communication
+* Protected routes
+* Environment-based API configuration
+* Responsive UI
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+## 🛠️ Tech Stack
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+| Technology        | Usage                   |
+| ----------------- | ----------------------- |
+| React             | Frontend UI             |
+| JavaScript        | Application logic       |
+| React Context API | Global state management |
+| Fetch API         | REST API communication  |
+| Laravel           | Backend REST API        |
+| MySQL             | Database                |
+| Razorpay          | Payment gateway         |
+| HTML5             | Markup                  |
+| CSS / Bootstrap   | Styling                 |
 
-### `npm run eject`
+## 🏗️ Application Architecture
 
-**Note: this is a one-way operation. Once you `eject`, you can't go back!**
+```text
+┌──────────────────────────────┐
+│        React Frontend        │
+│                              │
+│  Components / Pages          │
+│           │                  │
+│           ▼                  │
+│   React Context API          │
+│   Global State Management    │
+│           │                  │
+│           ▼                  │
+│        Fetch API             │
+└──────────────┬───────────────┘
+               │
+               │ REST API
+               ▼
+┌──────────────────────────────┐
+│       Laravel Backend        │
+│                              │
+│ Controllers / Models / Auth  │
+└──────────────┬───────────────┘
+               │
+               ▼
+┌──────────────────────────────┐
+│            MySQL             │
+└──────────────────────────────┘
 
-If you aren't satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+               │
+               ▼
+        Razorpay Gateway
+```
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you're on your own.
+## 📁 Project Structure
 
-You don't have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn't feel obligated to use this feature. However we understand that this tool wouldn't be useful if you couldn't customize it when you are ready for it.
+```text
+estore-frontend/
+│
+├── public/
+├── src/
+│   ├── components/
+│   ├── pages/
+│   ├── context/
+│   ├── services/
+│   └── ...
+│
+├── package.json
+└── README.md
+```
 
-## Learn More
+## ⚙️ Installation & Setup
 
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
+### 1. Clone the repository
 
-To learn React, check out the [React documentation](https://reactjs.org/).
+```bash
+git clone https://github.com/VishnuKumarSA/estore-frontend.git
+```
 
-### Code Splitting
+### 2. Navigate to the project
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
+```bash
+cd estore-frontend
+```
 
-### Analyzing the Bundle Size
+### 3. Install dependencies
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
+```bash
+npm install
+```
 
-### Making a Progressive Web App
+### 4. Configure the API
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
+Create the required environment configuration for the Laravel backend API.
 
-### Advanced Configuration
+Example:
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
+```env
+REACT_APP_API_URL=http://localhost:8000/api
+```
 
-### Deployment
+Update the API URL according to your Laravel backend environment.
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
+### 5. Start the development server
 
-### `npm run build` fails to minify
+```bash
+npm start
+```
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+The application will be available at:
+
+```text
+http://localhost:3000
+```
+
+## 🔗 Backend Repository
+
+**[E-Store Backend](https://github.com/VishnuKumarSA/estore-backend)**
+
+## 💳 Payment Integration
+
+The application integrates **Razorpay** for online payment processing.
+
+The React frontend communicates with the Laravel backend to create the Razorpay order and initiate the payment flow.
+
+Sensitive payment credentials are handled through environment configuration.
+
+## 🎯 Learning & Development Goals
+
+This project helped strengthen practical knowledge of:
+
+* React fundamentals
+* React Hooks
+* Context API
+* Global state management
+* Component-based development
+* Fetch API
+* REST API integration
+* Authentication flows
+* Frontend-backend communication
+* E-Commerce application architecture
+* Payment gateway integration
+
+## 🔮 Future Enhancements
+
+* Product search and filtering
+* Wishlist functionality
+* Enhanced order tracking
+* Improved UI/UX
+* Automated testing
+* Production deployment
+* Performance optimization
+
+## 👨‍💻 Developer
+
+**Vishnu Kumar S A**
+
+PHP / Full-Stack Developer with 5+ years of experience in PHP, Laravel, CakePHP, MySQL and REST API development, currently expanding into modern React-based full-stack development.
+
+## 📄 License
+
+This project is developed for learning and portfolio purposes.
+
+```
+```
