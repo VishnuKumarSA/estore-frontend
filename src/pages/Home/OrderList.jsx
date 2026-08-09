@@ -86,19 +86,17 @@ const OrderList = () => {
 
   const cancelOrder = async () => {
     try {
-      const res = await CartAPI(`orders/${cancelID}/order-status`, {
-        order_status: 'Cancelled'
-      }, 'PATCH');
+      const res = await CartAPI(`orders/${cancelID}/cancel`, {}, 'PATCH'); 
       if (res.status === 200) {
-        setcancelID(null)
-        setcancelModal(false)
+        setcancelID(null);
+        setcancelModal(false);
         toast.success("Order cancelled successfully");
         getOrders();
       }
     } catch (e) {
-      toast.error("Failed to cancel order");
+      toast.error(e.message || "Cancellation failed");
     }
-  }
+  };
 
   useEffect(() => {
     getOrders();

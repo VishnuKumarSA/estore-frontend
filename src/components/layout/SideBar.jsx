@@ -1,6 +1,30 @@
-import React from 'react'
+import React, { useEffect, useState } from 'react'
+import { CommonAPI } from '../../services.js/api';
 
 const SideBar = () => {
+
+    const [categories, setCategories] = useState([]);
+
+    const sortBy = [
+        'Newest',
+        'Price: Low to High',
+        'Price: High to Low'
+    ];
+
+    useEffect(() => {
+        const getCategories = (async () => {
+            try {
+                const res = await CommonAPI('categories')
+                setCategories(res.data)
+            } catch (e) {
+                console.log(e);
+            }
+        })
+        getCategories();
+    }, [])
+
+
+
     return (
         <div>
             <div className="w-72 space-y-6">
@@ -15,21 +39,11 @@ const SideBar = () => {
                         <li>
                             <button className="hover:text-blue-600 transition">All</button>
                         </li>
-                        <li>
-                            <button className="hover:text-blue-600 transition">Electronics</button>
-                        </li>
-                        <li>
-                            <button className="hover:text-blue-600 transition">Fashion</button>
-                        </li>
-                        <li>
-                            <button className="hover:text-blue-600 transition">Footwear</button>
-                        </li>
-                        <li>
-                            <button className="hover:text-blue-600 transition">Accessories</button>
-                        </li>
-                        <li>
-                            <button className="hover:text-blue-600 transition">Home & Kitchen</button>
-                        </li>
+                        {categories.map((category) => (
+                            <li>
+                                <button className="hover:text-blue-600 transition">{category.name}</button>
+                            </li>
+                        ))}
                     </ul>
                 </div>
 
@@ -40,11 +54,9 @@ const SideBar = () => {
                     </h3>
 
                     <select className="w-full border border-gray-300 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500">
-                        <option>Popular</option>
-                        <option>Newest</option>
-                        <option>Price: Low to High</option>
-                        <option>Price: High to Low</option>
-                        <option>Top Rated</option>
+                        {sortBy.map((sort) => (
+                            <option>{sort}</option>
+                        ))}
                     </select>
                 </div>
 

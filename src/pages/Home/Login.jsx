@@ -1,6 +1,7 @@
 import React, { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
+import Loader from '../../components/layout/Loader';
 
 const Login = () => {
 
@@ -39,7 +40,7 @@ const Login = () => {
                 <div className="min-h-screen flex flex-col items-center justify-center">
                     {
                         loading ? (
-                            <div> wait page loding</div>
+                            <Loader />
                         ) : (
                             <div className="max-w-md w-full m-5">
                                 <div

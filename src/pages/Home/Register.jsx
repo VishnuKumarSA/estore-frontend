@@ -1,6 +1,7 @@
 import React, { useState } from 'react'
 import { authAPI } from '../../services.js/auth';
 import { Link, useNavigate } from 'react-router-dom';
+import Loader from '../../components/layout/Loader';
 
 const Register = () => {
     const [formData, setFormData] = useState({
@@ -26,8 +27,7 @@ const Register = () => {
         }
         setLoading(true);
         try {
-            const apiData = await authAPI(formData, "register");
-            console.log(apiData);
+            const apiData = await authAPI(formData, "register");            
             if (apiData.status === 201) {
                 setLoading(false);                
                 navigate('/login');
@@ -42,7 +42,7 @@ const Register = () => {
             <main className="px-4 md:px-8 min-h-screen flex flex-col items-center justify-center">
                 <div className="max-w-md w-full">
                     {loding ? (
-                        <div> page is loding</div>
+                        <Loader />
                     ) : (
                         <div
                             className="p-6 rounded-lg bg-white border border-slate-300 shadow-xs md:p-6 dark:bg-neutral-800 dark:border-neutral-700">

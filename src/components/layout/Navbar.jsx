@@ -120,7 +120,7 @@ const Navbar = () => {
 
                     <i className="m-3 fa-regular fa-user"></i>
                     {token ? (
-                        <button onClick={handleLogout}>Logout</button>
+                        <button className='cursor-pointer' onClick={handleLogout}>Logout</button>
                     ) :
                         <Link to="login"> Login </Link>
                     }
